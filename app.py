@@ -4,7 +4,7 @@ import pandas as pd
 from mitosheet.streamlit.v1 import spreadsheet
 
 with st.form("splitter"):
-    file = st.file_uploader("Upload File from Sainsburys Trolley Page")17
+    file = st.file_uploader("Upload File from Sainsburys Trolley Page")
     submitted = st.form_submit_button("Uplaod")
 
 # Load and parse the HTML file
