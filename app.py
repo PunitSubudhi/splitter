@@ -1,11 +1,14 @@
 from bs4 import BeautifulSoup
 import streamlit as st
 import pandas as pd
-import openpyxl
-file = st.file_uploader("Upload File from Sainsburys Trolley Page")
+from mitosheet.streamlit.v1 import spreadsheet
+
+with st.form("splitter"):
+    file = st.file_uploader("Upload File from Sainsburys Trolley Page")17
+    submitted = st.form_submit_button("Uplaod")
 
 # Load and parse the HTML file
-if file:
+if submitted:
     try:
         soup = BeautifulSoup(file.read(), "html.parser")
 
