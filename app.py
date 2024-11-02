@@ -5,6 +5,7 @@ from mitosheet.streamlit.v1 import spreadsheet
 
 with st.form("splitter"):
     file = st.file_uploader("Upload File from Sainsburys Trolley Page")
+    launch_mito = st.checkbox("Launch Mito")
     submitted = st.form_submit_button("Uplaod")
 
 # Load and parse the HTML file
@@ -46,9 +47,16 @@ if submitted:
         df = df[["name", "rate", "quantity", "price"]]
         df.columns = ["Item", "Rate", "Quantity", "Price"]
         st.dataframe(df)
+        st.session_state.df = df
+        st.session_state.uploaded = True
         csv = df.to_csv(index=False)
         st.download_button(label="Download CSV", data=csv, file_name="trolley_items.csv", mime="text/csv")
         for item in extracted_items:
             print(f"Item: {item['name']}\nQuantity: {item['quantity']}\nPrice: {item['price']}\n{'-'*20}")
     except Exception as e:
         st.error(f"An error occurred: {e}")
+
+if launch_mito and "uploaded" in st.session_state:
+    dic, code = spreadsheet(st.session_state.df)
+    st.code(code)
+    
