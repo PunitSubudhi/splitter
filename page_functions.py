@@ -1,8 +1,10 @@
 from bs4 import BeautifulSoup
 import streamlit as st
 import pandas as pd
-from mitosheet.streamlit.v1 import spreadsheet
-
+from splitwise import Splitwise
+from splitwise.expense import Expense
+from splitwise.user import ExpenseUser
+from streamlit_oauth import OAuth2Component
 
 def extract_trolley_items(file):
     try:
@@ -98,3 +100,7 @@ def get_final_csv_downlaod():
         csv_return += "\n\n"
         csv_return += csv
     st.download_button(label="Download Split", data=csv_return, file_name="trolley_items_final.csv", mime="text/csv",key="split")
+    
+def splitwise():
+    sObj = Splitwise("fZYEdpSuM6gYXND5h097UmPgETZNNpEy6EEUppVm","poBh7c0Z4oAtvVPFmQiEElPnH6sbctjhUmb2gdNQ",api_key="j4I679pFrffR73HWz1L51fzgkqzNYM4pPEWwqVU7")
+    current = sObj.getCurrentUser()
