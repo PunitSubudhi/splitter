@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import streamlit as st
 import pandas as pd
+from mitosheet.streamlit.v1 import spreadsheet
 
 
 def extract_trolley_items(file):
@@ -33,8 +34,8 @@ def extract_trolley_items(file):
                 "name": item_name,
                 "rate": price_price / quantity_text if quantity_text != 0 else 0,
                 "quantity": quantity_text,
-                "price": price_text,
-                "price_price": price_price,
+                "price_text": price_text,
+                "price": price_price,
                 "price_currency": price_currency
             })
         st.session_state.extracted_items = extracted_items
@@ -42,3 +43,36 @@ def extract_trolley_items(file):
         st.error(f"An error occurred: {e}")
         return False
     return True
+
+
+def get_df():
+    if st.session_state.get("extracted_items") is None and st.session_state.get("df") is None:
+        st.error("No data available. Please upload a file.")
+    # If extracted items are available, create a DataFrame
+    elif st.session_state.get("df") is None and st.session_state.get("extracted_items") is not None:
+        df = pd.DataFrame(st.session_state.extracted_items)
+        save_df(df)
+    df_to_return = pd.DataFrame(st.session_state["df"])
+    # if price_text and price_currency columns are present, remove them
+    if "price_text" in df_to_return.columns and "price_currency" in df_to_return.columns:
+        df_to_return.drop(columns=["price_text","price_currency"], inplace=True)
+    return df_to_return
+   
+def download_csv():
+    df = get_df()
+    csv = df.to_csv(index=False)
+    st.download_button(label="Download CSV", data=csv, file_name="trolley_items.csv", mime="text/csv")
+
+def save_df(df):
+    try:
+        df_dict = df.to_dict().copy()
+        st.session_state["df"] = df_dict
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return False
+    return True
+
+def launch_mito():
+    dic, code = spreadsheet(get_df())
+    st.code(code)
+    st.session_state["mito_code"]=code
