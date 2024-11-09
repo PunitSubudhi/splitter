@@ -27,8 +27,6 @@ def extract_trolley_items(file):
             price_text = price_span.get_text(strip=True) if price_span else "N/A"
             price_currency = price_text[:1]
             price_price = float(price_text.removeprefix(price_currency))
-            print(price_currency)
-            print(price_price)
             # Append to results
             extracted_items.append({
                 "name": item_name,
@@ -61,7 +59,7 @@ def get_df():
 def download_csv():
     df = get_df()
     csv = df.to_csv(index=False)
-    st.download_button(label="Download CSV", data=csv, file_name="trolley_items.csv", mime="text/csv")
+    st.download_button(label="Download Extracted Items", data=csv, file_name="trolley_items.csv", mime="text/csv")
 
 def save_df(df):
     try:
@@ -72,7 +70,31 @@ def save_df(df):
         return False
     return True
 
-def launch_mito():
-    dic, code = spreadsheet(get_df())
-    st.code(code)
-    st.session_state["mito_code"]=code
+def save_new_df(df):
+    try:
+        st.session_state["new_df"] = df
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return False
+    return True
+
+def get_new_df():
+    if st.session_state.get("new_df") is None:
+        st.error("No data available. Please upload a file.")
+    df = pd.DataFrame(st.session_state["new_df"])
+    return df
+
+def get_final_csv_downlaod():
+    df = get_new_df()
+    csv = df.to_csv(index=False)
+    friend_due = st.session_state.get("friend_due")
+    if friend_due is not None:
+        friend_due_df = pd.DataFrame(friend_due)
+        csv_return = ""
+        friend_due_df = friend_due_df.T
+        friend_due_df.columns = friend_due_df.iloc[0]
+        friend_due_df = friend_due_df[1:]
+        csv_return += friend_due_df.to_csv(index=False)
+        csv_return += "\n\n"
+        csv_return += csv
+    st.download_button(label="Download Split", data=csv_return, file_name="trolley_items_final.csv", mime="text/csv",key="split")
