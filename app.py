@@ -9,7 +9,7 @@ st.set_page_config(page_title="Split the Bill", page_icon=":money_with_wings:", 
 
 if st.session_state.get("file_uploaded") is None:
     with st.form("splitter"):
-        file = st.file_uploader("Upload File from Sainsburys Trolley Page")
+        file = st.file_uploader("Upload File from Sainsburys Trolley Page", type=["html"])
         submitted = st.form_submit_button("Uplaod and View")
 
     # Load and parse the HTML file
