@@ -104,3 +104,23 @@ def get_final_csv_downlaod():
 def splitwise():
     sObj = Splitwise("fZYEdpSuM6gYXND5h097UmPgETZNNpEy6EEUppVm","poBh7c0Z4oAtvVPFmQiEElPnH6sbctjhUmb2gdNQ",api_key="j4I679pFrffR73HWz1L51fzgkqzNYM4pPEWwqVU7")
     current = sObj.getCurrentUser()
+    
+def oauth2(CLIENT_ID, CLIENT_SECRET, AUTHORIZE_URL, TOKEN_URL, REFRESH_TOKEN_URL, REVOKE_TOKEN_URL,REDIRECT_URI, SCOPE):
+    oauth2 = OAuth2Component(CLIENT_ID, CLIENT_SECRET, AUTHORIZE_URL, TOKEN_URL, REFRESH_TOKEN_URL, REVOKE_TOKEN_URL)
+    
+    if 'token' not in st.session_state:
+        # If not, show authorize button
+        result = oauth2.authorize_button("Authorize", REDIRECT_URI, SCOPE)
+        if result and 'token' in result:
+            # If authorization successful, save token in session state
+            st.session_state.token = result.get('token')
+            st.rerun()
+    else:
+        # If token exists in session state, show the token
+        token = st.session_state['token']
+        st.json(token)
+        if st.button("Refresh Token"):
+            # If refresh token button is clicked, refresh the token
+            token = oauth2.refresh_token(token)
+            st.session_state.token = token
+            st.rerun()
