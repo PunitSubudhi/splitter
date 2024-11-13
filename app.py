@@ -7,6 +7,7 @@ from page_functions import *
 st.set_page_config(page_title="Split the Bill", page_icon=":money_with_wings:", layout="wide")
 
 
+
 if st.query_params.get("ck") is not None and st.query_params.get("cs") is not None and st.query_params.get("ak") is not None and st.query_params.get("gid") is not None:
     CONSUMER_KEY = st.query_params.get("ck")
     CONSUMER_SECRET = st.query_params.get("cs")
@@ -19,6 +20,7 @@ if st.query_params.get("ck") is not None and st.query_params.get("cs") is not No
     st.session_state["sObj"] = sObj
     
 if st.session_state.get("file_uploaded") is None:
+    st.title("Uplaod Sainsburys Trolley Page or Upload CSV with items to continue")
     with st.form("splitter"):
         file = st.file_uploader("Upload File from Sainsburys Trolley Page", type=["html"])
         submitted = st.form_submit_button("Uplaod and View")
