@@ -7,6 +7,17 @@ from page_functions import *
 st.set_page_config(page_title="Split the Bill", page_icon=":money_with_wings:", layout="wide")
 
 
+if st.query_params.get("ck") is not None and st.query_params.get("cs") is not None and st.query_params.get("ak") is not None and st.query_params.get("gid") is not None:
+    CONSUMER_KEY = st.query_params.get("ck")
+    CONSUMER_SECRET = st.query_params.get("cs")
+    SPLITWISE_API_KEY = st.query_params.get("ak")
+    GROUP_ID = st.query_params.get("gid")
+    st.session_state["GROUP_ID"] = GROUP_ID
+    sObj = Splitwise(CONSUMER_KEY, CONSUMER_SECRET,api_key=SPLITWISE_API_KEY)
+    s=sObj
+    current = sObj.getCurrentUser()
+    st.session_state["sObj"] = sObj
+    
 if st.session_state.get("file_uploaded") is None:
     with st.form("splitter"):
         file = st.file_uploader("Upload File from Sainsburys Trolley Page",type=["html"])
@@ -33,7 +44,23 @@ elif st.session_state.get("file_uploaded") and not st.session_state.get("friends
     download_csv()
     # take input of names of friends to be split
     with st.form("friends"):
-        friends = st.text_input("Enter names of friends to split the bill with (separated by commas)")
+        if st.session_state.get("sObj") is not None:
+            st.session_state["splitwise_members"] = {}
+            sObj = st.session_state["sObj"]
+            group = sObj.getGroup(GROUP_ID)
+            members = group.getMembers()
+            for friend in members:
+                fid =f"{friend.getId()}"
+                st.session_state["splitwise_members"][friend.getFirstName()] = {
+                    "name": friend.getFirstName(),
+                    "email" : friend.getEmail(),
+                    "id": fid
+                }
+            friends = [friend.getFirstName() for friend in group.getMembers()]
+            friends = ",".join(friends)
+        else:
+            friends = ""    
+        friends = st.text_input("Enter names of friends to split the bill with (separated by commas)",value=friends)
         if st.form_submit_button("Submit"):
             friends = friends.split(",")
             # Trim Whitesapce
@@ -55,6 +82,8 @@ elif st.session_state.get("friends_uploaded"):
     
     with st.form("split portions"):
         edited_df = st.data_editor(df)
+        if st.session_state.get("sObj") is not None:
+            paid_by = st.selectbox("Select who paid", options=st.session_state.friends_list)
         if st.form_submit_button("Calculate portions"):
             edited_df["total_portions"] = edited_df[st.session_state.friends_list].sum(axis=1)
             edited_df["portion_price"] = edited_df["price"] / edited_df["total_portions"]
@@ -67,10 +96,12 @@ elif st.session_state.get("friends_uploaded"):
             for friend in st.session_state.friends_list:
                 friend_due.append({
                     "Friend": friend,
-                    "Amount": edited_df[f"{friend}_portion"].sum()
+                    "Amount": f'{edited_df[f"{friend}_portion"].sum():.2f}'
                 })
             st.dataframe(friend_due)
             st.session_state["friend_due"] = friend_due
+            if st.session_state.get("sObj") is not None:
+                st.session_state["paid_by"] = paid_by
    
 if st.session_state.get("new_df") is not None:
     cols = st.columns(3)
@@ -81,3 +112,12 @@ if st.session_state.get("new_df") is not None:
     with cols[1]:
         st.markdown("### Download Extracted Item Bill")
         download_csv()
+        
+if st.session_state.get("GROUP_ID") is not None and st.session_state.get("new_df") is not None:
+    with st.expander("Push to Splitwise"):
+        if st.session_state.get("sObj") is not None:
+            sObj = st.session_state["sObj"]
+            if st.button("Push to Splitwise"):
+                push_expense(sObj)
+        else:
+            st.error("Please upload the file and add friends to split the bill with")

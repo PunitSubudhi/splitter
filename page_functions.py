@@ -101,26 +101,35 @@ def get_final_csv_downlaod():
         csv_return += csv
     st.download_button(label="Download Split", data=csv_return, file_name="trolley_items_final.csv", mime="text/csv",key="split")
     
-def splitwise():
-    sObj = Splitwise("fZYEdpSuM6gYXND5h097UmPgETZNNpEy6EEUppVm","poBh7c0Z4oAtvVPFmQiEElPnH6sbctjhUmb2gdNQ",api_key="j4I679pFrffR73HWz1L51fzgkqzNYM4pPEWwqVU7")
-    current = sObj.getCurrentUser()
+def push_expense(sObj):
+    new_df = get_new_df()
+    Total_due = new_df["price"].sum()
+    for friend in st.session_state.friend_due:
+        st.session_state.splitwise_members[friend["Friend"]]["paid_share"] = "00.00" if friend["Friend"] != st.session_state.paid_by else f"{Total_due:.2f}"
+        st.session_state.splitwise_members[friend["Friend"]]["owed_share"] = friend["Amount"]
     
-def oauth2(CLIENT_ID, CLIENT_SECRET, AUTHORIZE_URL, TOKEN_URL, REFRESH_TOKEN_URL, REVOKE_TOKEN_URL,REDIRECT_URI, SCOPE):
-    oauth2 = OAuth2Component(CLIENT_ID, CLIENT_SECRET, AUTHORIZE_URL, TOKEN_URL, REFRESH_TOKEN_URL, REVOKE_TOKEN_URL)
+    """ expense_users =
+        {
+            "id" : friend.get("id"),
+            "paid_share" : friend["paid_share"],
+            "owed_share" : friend["owed_share"]
+        }"""
+    expense_users = []    
+    for friend in st.session_state.splitwise_members:
+        print(friend)
+        expense_user = ExpenseUser()
+        expense_user.setId(st.session_state.splitwise_members[friend]["id"])
+        expense_user.setPaidShare(st.session_state.splitwise_members[friend]["paid_share"])
+        expense_user.setOwedShare(st.session_state.splitwise_members[friend]["owed_share"])
+        expense_users.append(expense_user)
+    expense = Expense()
+    expense.setCost(Total_due)
+    expense.setDescription("Sainsburys Order")
+    expense.setUsers(expense_users)
+    expense.setGroupId(st.session_state["GROUP_ID"])
+    nExpense, errors = sObj.createExpense(expense)
     
-    if 'token' not in st.session_state:
-        # If not, show authorize button
-        result = oauth2.authorize_button("Authorize", REDIRECT_URI, SCOPE)
-        if result and 'token' in result:
-            # If authorization successful, save token in session state
-            st.session_state.token = result.get('token')
-            st.rerun()
+    if nExpense is not None:
+        st.success("Expense created successfully!")
     else:
-        # If token exists in session state, show the token
-        token = st.session_state['token']
-        st.json(token)
-        if st.button("Refresh Token"):
-            # If refresh token button is clicked, refresh the token
-            token = oauth2.refresh_token(token)
-            st.session_state.token = token
-            st.rerun()
+        st.error(f"An error occurred: {errors.getErrors()}")
