@@ -24,7 +24,8 @@ if st.session_state.get("file_uploaded") is None:
         submitted = st.form_submit_button("Uplaod and View")
 
     # Load and parse the HTML file
-    if submitted:
+    if submitted and file is not None:
+        
         if extract_trolley_items(file):
             st.toast("Extraction successful")
         else:
@@ -32,16 +33,18 @@ if st.session_state.get("file_uploaded") is None:
         df = get_df()
         st.dataframe(df)
         st.session_state.file_uploaded = True
-        st.markdown("### Download Data")
-        download_csv()
+        if st.button("continue"):
+            st.rerun()
+    elif submitted and file is None:
+        st.warning("Please upload the file to proceed")
         
         
 elif st.session_state.get("file_uploaded") and not st.session_state.get("friends_uploaded"):
     df = get_df()
-    with st.expander("View Data"):
+    with st.expander("View/Download Data"):
         st.dataframe(df)
-    st.markdown("### Download Data")
-    download_csv()
+        st.markdown("### Download Data")
+        download_csv()
     # take input of names of friends to be split
     with st.form("friends"):
         if st.session_state.get("sObj") is not None:
@@ -60,13 +63,16 @@ elif st.session_state.get("file_uploaded") and not st.session_state.get("friends
             friends = ",".join(friends)
         else:
             friends = ""    
+            
         friends = st.text_input("Enter names of friends to split the bill with (separated by commas)",value=friends)
+        
         if st.form_submit_button("Submit"):
             friends = friends.split(",")
             # Trim Whitesapce
             friends = [friend.strip() for friend in friends]
             st.session_state.friends_list = friends
             st.session_state["friends_uploaded"] = True
+            st.rerun()
             
 elif st.session_state.get("friends_uploaded"):
     df = get_df()

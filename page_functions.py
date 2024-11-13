@@ -57,7 +57,13 @@ def get_df():
     if "price_text" in df_to_return.columns and "price_currency" in df_to_return.columns:
         df_to_return.drop(columns=["price_text","price_currency"], inplace=True)
     return df_to_return
-   
+
+def nav_to(url):
+    nav_script = """
+        <meta http-equiv="refresh" content="0; url="%s"">
+    """ % (url)
+    st.write(nav_script, unsafe_allow_html=True)
+
 def download_csv():
     df = get_df()
     csv = df.to_csv(index=False)
