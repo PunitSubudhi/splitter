@@ -5,6 +5,7 @@ from splitwise import Splitwise
 from splitwise.expense import Expense
 from splitwise.user import ExpenseUser
 from streamlit_oauth import OAuth2Component
+from decimal import Decimal
 
 def extract_trolley_items(file):
     try:
@@ -108,8 +109,8 @@ def get_final_csv_downlaod():
     st.download_button(label="Download Split", data=csv_return, file_name="trolley_items_final.csv", mime="text/csv",key="split")
     
 def push_expense(sObj):
-    new_df = get_new_df()
-    Total_due = new_df["price"].sum()
+    
+    Total_due = sum([Decimal(friend["Amount"]) for friend in st.session_state.friend_due])
     for friend in st.session_state.friend_due:
         st.session_state.splitwise_members[friend["Friend"]]["paid_share"] = "00.00" if friend["Friend"] != st.session_state.paid_by else f"{Total_due:.2f}"
         st.session_state.splitwise_members[friend["Friend"]]["owed_share"] = friend["Amount"]
@@ -122,7 +123,6 @@ def push_expense(sObj):
         }"""
     expense_users = []    
     for friend in st.session_state.splitwise_members:
-        print(friend)
         expense_user = ExpenseUser()
         expense_user.setId(st.session_state.splitwise_members[friend]["id"])
         expense_user.setPaidShare(st.session_state.splitwise_members[friend]["paid_share"])

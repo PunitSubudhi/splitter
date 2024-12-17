@@ -7,17 +7,29 @@ from page_functions import *
 st.set_page_config(page_title="Split the Bill", page_icon=":money_with_wings:", layout="wide")
 
 
+# Check if all required Splitwise parameters are present in query params
+required_params = {
+    "ck": "CONSUMER_KEY",
+    "cs": "CONSUMER_SECRET", 
+    "ak": "SPLITWISE_API_KEY",
+    "gid": "GROUP_ID"
+}
 
-if st.query_params.get("ck") is not None and st.query_params.get("cs") is not None and st.query_params.get("ak") is not None and st.query_params.get("gid") is not None:
-    CONSUMER_KEY = st.query_params.get("ck")
-    CONSUMER_SECRET = st.query_params.get("cs")
-    SPLITWISE_API_KEY = st.query_params.get("ak")
-    GROUP_ID = st.query_params.get("gid")
-    st.session_state["GROUP_ID"] = GROUP_ID
-    sObj = Splitwise(CONSUMER_KEY, CONSUMER_SECRET,api_key=SPLITWISE_API_KEY)
-    s=sObj
-    current = sObj.getCurrentUser()
-    st.session_state["sObj"] = sObj
+# Get all params or None if any are missing
+params = {key: st.query_params.get(param) for param, key in required_params.items()}
+if all(params.values()):
+    # Store credentials and initialize Splitwise client
+    for key, value in params.items():
+        st.session_state[key] = value
+            
+    # Initialize Splitwise client and store in session state
+    splitwise_client = Splitwise(
+        st.session_state["CONSUMER_KEY"], 
+        st.session_state["CONSUMER_SECRET"], 
+        api_key=st.session_state["SPLITWISE_API_KEY"]
+    )
+    splitwise_client.getCurrentUser()  # Verify credentials work
+    st.session_state["sObj"] = splitwise_client
     
 if st.session_state.get("file_uploaded") is None:
     st.title("Uplaod Sainsburys Trolley Page or Upload CSV with items to continue")
