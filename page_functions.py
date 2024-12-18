@@ -137,6 +137,7 @@ def push_expense(sObj):
     
     if nExpense is not None:
         st.success("Expense created successfully!")
+        st.expander("View Expense Details").write(nExpense)
     else:
         st.error(f"An error occurred: {errors.getErrors()}")
         
