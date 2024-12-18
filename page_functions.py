@@ -130,7 +130,7 @@ def push_expense(sObj):
         expense_users.append(expense_user)
     expense = Expense()
     expense.setCost(Total_due)
-    expense.setDescription("Sainsburys Order")
+    expense.setDescription(f"Sainsburys - {st.session_state.paid_by}")
     expense.setUsers(expense_users)
     expense.setGroupId(st.session_state["GROUP_ID"])
     nExpense, errors = sObj.createExpense(expense)
@@ -139,3 +139,24 @@ def push_expense(sObj):
         st.success("Expense created successfully!")
     else:
         st.error(f"An error occurred: {errors.getErrors()}")
+        
+        base=errors.getErrors().get("base")
+        if base:
+            match = re.search(r"owed shares \((£\d+\.\d+)\) is different than the total cost \((£\d+\.\d+)\)", base[0])
+            if match:
+                owed_shares = match.group(1)
+                total_cost = match.group(2)
+                st.error(f"The total of everyone's owed shares ({owed_shares}) is different than the total cost ({total_cost})")
+                if st.button("Fix the total cost"):
+                    new_expense = Expense()
+                    new_expense.setCost(owed_shares)
+                    expense.setDescription(f"Sainsburys - {st.session_state.paid_by}")
+                    expense.setUsers(expense_users)
+                    expense.setGroupId(st.session_state["GROUP_ID"])
+                    nExpense, errors = sObj.createExpense(expense)
+                    
+                    if nExpense is not None:
+                        st.success("Expense created successfully!")
+                    else:
+                        st.error(f"An error occurred: {errors.getErrors()}")
+                        
