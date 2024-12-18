@@ -64,7 +64,7 @@ elif st.session_state.get("file_uploaded") and not st.session_state.get("friends
         if st.session_state.get("sObj") is not None:
             st.session_state["splitwise_members"] = {}
             sObj = st.session_state["sObj"]
-            group = sObj.getGroup(GROUP_ID)
+            group = sObj.getGroup(st.session_state["GROUP_ID"])
             members = group.getMembers()
             for friend in members:
                 fid =f"{friend.getId()}"
