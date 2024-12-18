@@ -136,12 +136,7 @@ def push_expense(sObj):
     nExpense, errors = sObj.createExpense(expense)
     
     if nExpense is not None:
-        st.success("Expense created successfully!")
-        st.write(f"Expense ID: {nExpense.getId()}")
-        st.write(f"Expense URL: {nExpense.getLink()}")
-        st.write(f"Expense Details: {nExpense.getDetails()}")
-        st.write(f"Expense Cost: {nExpense.getCost()}")
-        st.write(f"Expense Created At: {nExpense.getCreatedAt()}")
+        st.success(f"Expense created successfully with id: {nExpense.getId()}")
         
     else:
         st.error(f"An error occurred: {errors.getErrors()}")
