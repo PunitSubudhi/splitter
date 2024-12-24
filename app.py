@@ -1,3 +1,31 @@
+
+"""
+This Streamlit application helps users split a bill by uploading a Sainsbury's Trolley Page HTML file or a CSV file with items. 
+It integrates with Splitwise to manage group expenses.
+Modules:
+- BeautifulSoup: For parsing HTML files.
+- streamlit: For creating the web application.
+- pandas: For data manipulation.
+- mitosheet: For spreadsheet-like data editing in Streamlit.
+- page_functions: Custom functions for handling file uploads and data extraction.
+Functions:
+- extract_trolley_items(file): Extracts items from the uploaded HTML file.
+- get_df(): Retrieves the current DataFrame stored in session state.
+- save_df(df): Saves the DataFrame to session state.
+- save_new_df(df): Saves the updated DataFrame with split portions to session state.
+- download_csv(): Provides a CSV download link for the extracted items.
+- get_final_csv_downlaod(): Provides a CSV download link for the split bill.
+- push_expense(sObj): Pushes the calculated expenses to Splitwise.
+Workflow:
+1. Check for required Splitwise parameters in the query params.
+2. Initialize Splitwise client and store credentials in session state.
+3. Prompt user to upload a Sainsbury's Trolley Page HTML file or a CSV file.
+4. Extract items from the uploaded file and display them in a DataFrame.
+5. Prompt user to enter names of friends to split the bill with.
+6. Add columns for each friend in the DataFrame and allow user to edit portions.
+7. Calculate portions and display the split bill.
+8. Provide options to download the split bill and push expenses to Splitwise.
+"""
 from bs4 import BeautifulSoup
 import streamlit as st
 import pandas as pd
