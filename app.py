@@ -156,24 +156,26 @@ elif st.session_state.get("friends_uploaded"):
         if st.session_state.get("sObj") is not None:
             paid_by = st.selectbox("Select who paid", options=st.session_state.friends_list)
         if st.form_submit_button("Calculate portions"):
-            edited_df["total_portions"] = edited_df[st.session_state.friends_list].sum(axis=1)
-            edited_df["portion_price"] = edited_df["price"] / edited_df["total_portions"]
-            for friend in st.session_state.friends_list:
-                edited_df[f"{friend}_portion"] = edited_df[friend] * edited_df["portion_price"]
-            with st.expander("View Split Bill"):
-                st.dataframe(edited_df)
-            save_new_df(edited_df)
-            friend_due = []
-            for friend in st.session_state.friends_list:
-                friend_due.append({
-                    "Friend": friend,
-                    "Amount": f'{edited_df[f"{friend}_portion"].sum():.2f}'
-                })
-            st.dataframe(friend_due)
-            st.session_state["friend_due"] = friend_due
-            if st.session_state.get("sObj") is not None:
-                st.session_state["paid_by"] = paid_by
-   
+            try:
+                edited_df["total_portions"] = edited_df[st.session_state.friends_list].sum(axis=1)
+                edited_df["portion_price"] = edited_df["price"] / edited_df["total_portions"]
+                for friend in st.session_state.friends_list:
+                    edited_df[f"{friend}_portion"] = edited_df[friend] * edited_df["portion_price"]
+                with st.expander("View Split Bill"):
+                    st.dataframe(edited_df)
+                save_new_df(edited_df)
+                friend_due = []
+                for friend in st.session_state.friends_list:
+                    friend_due.append({
+                        "Friend": friend,
+                        "Amount": f'{edited_df[f"{friend}_portion"].sum():.2f}'
+                    })
+                st.dataframe(friend_due)
+                st.session_state["friend_due"] = friend_due
+                if st.session_state.get("sObj") is not None:
+                    st.session_state["paid_by"] = paid_by
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
 if st.session_state.get("new_df") is not None:
     cols = st.columns(3)
     
