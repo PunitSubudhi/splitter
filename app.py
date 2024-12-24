@@ -84,7 +84,7 @@ if st.session_state.get("file_uploaded") is None:
     with st.expander("Input Data Manually"):
         input_method = st.radio("Select Input Method", ["CSV", "Manual"])
         if input_method == "CSV":
-            csv_file = st.file_uploader("Upload CSV file")
+            csv_file = st.file_uploader("Upload CSV file", type=["csv"])
             input_df = pd.read_csv(csv_file) if csv_file is not None else None
         elif input_method == "Manual":
             st.markdown("### Enter data manually")
