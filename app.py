@@ -79,7 +79,30 @@ if st.session_state.get("file_uploaded") is None:
             st.rerun()
     elif submitted and file is None:
         st.warning("Please upload the file to proceed")
-        
+
+if st.session_state.get("file_uploaded") is None:
+    with st.expander("Input Data Manually"):
+        input_method = st.radio("Select Input Method", ["CSV", "Manual"])
+        if input_method == "CSV":
+            csv_file = st.file_uploader("Upload CSV file")
+            input_df = pd.read_csv(csv_file) if csv_file is not None else None
+        elif input_method == "Manual":
+            st.markdown("### Enter data manually")
+            input_df = pd.DataFrame({
+                "name": ["Item 1", "Item 2", "Item 3"],
+                "rate": [1.99, 2.99, 3.99],
+                "quantity": [1, 2, 3],
+                "price": [1.99, 5.98, 11.97]
+            })
+            input_df,code = spreadsheet(input_df)
+            print(input_df)
+            input_df = input_df.get("df1")
+            
+        if st.button("Save"):
+            st.session_state.extracted_items = input_df.to_dict(orient="records")
+            save_df(input_df)
+            st.session_state.file_uploaded = True
+            st.rerun()
         
 elif st.session_state.get("file_uploaded") and not st.session_state.get("friends_uploaded"):
     df = get_df()
