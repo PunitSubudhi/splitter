@@ -92,7 +92,7 @@ if st.session_state.get("file_uploaded") is None:
             # input_df,code = spreadsheet(input_df)¯
             # print(input_df)
             # input_df = input_df.get("df1")
-            input_df = st.data_editor(input_df)
+            input_df = st.data_editor(input_df,num_rows="dynamic",use_container_width=True)
             
         if st.button("Save"):
             st.session_state.extracted_items = input_df.to_dict(orient="records")
