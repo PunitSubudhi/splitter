@@ -94,9 +94,10 @@ if st.session_state.get("file_uploaded") is None:
                 "quantity": [1, 2, 3],
                 "price": [1.99, 5.98, 11.97]
             })
-            input_df,code = spreadsheet(input_df)
-            print(input_df)
-            input_df = input_df.get("df1")
+            # input_df,code = spreadsheet(input_df)
+            # print(input_df)
+            # input_df = input_df.get("df1")
+            input_df = st.data_editor(input_df)
             
         if st.button("Save"):
             st.session_state.extracted_items = input_df.to_dict(orient="records")
