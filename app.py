@@ -88,7 +88,12 @@ if st.session_state.get("file_uploaded") is None:
             input_df = pd.read_csv(csv_file) if csv_file is not None else None
         elif input_method == "Manual":
             st.markdown("### Enter data manually")
-            input_df = pd.DataFrame(columns=["name","rate","quantity","price"])
+            input_df = pd.DataFrame({
+                "name": ["item1", "item2"],
+                "rate": [10.0, 20.0],
+                "quantity": [1, 2],
+                "price": [10.0, 40.0]
+            })
             # input_df,code = spreadsheet(input_df)¯
             # print(input_df)
             # input_df = input_df.get("df1")
