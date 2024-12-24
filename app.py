@@ -89,10 +89,10 @@ if st.session_state.get("file_uploaded") is None:
         elif input_method == "Manual":
             st.markdown("### Enter data manually")
             input_df = pd.DataFrame({
-                "name": ["Item 1", "Item 2", "Item 3"],
-                "rate": [1.99, 2.99, 3.99],
-                "quantity": [1, 2, 3],
-                "price": [1.99, 5.98, 11.97]
+                "name": ["Item 1", "Item 2", "Item 3"].append([""] * 100),
+                "rate": [1.99, 2.99, 3.99].append([None] * 100),
+                "quantity": [1, 2, 3].append([None] * 100),
+                "price": [1.99, 5.98, 11.97].append([None] * 100)
             })
             # input_df,code = spreadsheet(input_df)¯
             # print(input_df)
