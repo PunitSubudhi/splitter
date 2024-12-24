@@ -88,16 +88,11 @@ if st.session_state.get("file_uploaded") is None:
             input_df = pd.read_csv(csv_file) if csv_file is not None else None
         elif input_method == "Manual":
             st.markdown("### Enter data manually")
-            input_df = pd.DataFrame({
-                "name": ["Item 1", "Item 2", "Item 3"].append([""] * 100),
-                "rate": [1.99, 2.99, 3.99].append([None] * 100),
-                "quantity": [1, 2, 3].append([None] * 100),
-                "price": [1.99, 5.98, 11.97].append([None] * 100)
-            })
+            input_df = pd.DataFrame(columns=["name","rate","quantity","price"])
             # input_df,code = spreadsheet(input_df)¯
             # print(input_df)
             # input_df = input_df.get("df1")
-            input_df = st.data_editor()
+            input_df = st.data_editor(input_df)
             
         if st.button("Save"):
             st.session_state.extracted_items = input_df.to_dict(orient="records")
