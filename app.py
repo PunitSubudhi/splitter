@@ -90,7 +90,6 @@ if st.session_state.get("file_uploaded") is None:
                 "name": ["item1", "item2"],
                 "rate": [10.0, 20.0],
                 "quantity": [1, 2],
-                "price": [10.0, 40.0]
             })
             # input_df,code = spreadsheet(input_df)¯
             # print(input_df)
@@ -98,6 +97,8 @@ if st.session_state.get("file_uploaded") is None:
             input_df = st.data_editor(input_df,num_rows="dynamic",use_container_width=True)
             
         if st.button("Save"):
+            if input_method == "Manual":
+                input_df["price"] = input_df["rate"] * input_df["quantity"]
             st.session_state.extracted_items = input_df.to_dict(orient="records")
             save_df(input_df)
             st.session_state.file_uploaded = True
@@ -107,6 +108,8 @@ elif st.session_state.get("file_uploaded") and not st.session_state.get("friends
     df = get_df()
     with st.expander("View/Download Data"):
         st.dataframe(df)
+        Total = df["price"].sum()
+        st.write(f"Total: {Total}")
         st.markdown("### Download Data")
         download_csv()
     # take input of names of friends to be split
