@@ -6,7 +6,6 @@ Modules:
 - BeautifulSoup: For parsing HTML files.
 - streamlit: For creating the web application.
 - pandas: For data manipulation.
-- mitosheet: For spreadsheet-like data editing in Streamlit.
 - page_functions: Custom functions for handling file uploads and data extraction.
 Functions:
 - extract_trolley_items(file): Extracts items from the uploaded HTML file.
@@ -29,7 +28,6 @@ Workflow:
 from bs4 import BeautifulSoup
 import streamlit as st
 import pandas as pd
-from mitosheet.streamlit.v1 import spreadsheet
 from page_functions import *
 
 st.set_page_config(page_title="Split the Bill", page_icon=":money_with_wings:", layout="wide")
