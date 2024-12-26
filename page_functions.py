@@ -108,7 +108,7 @@ def get_final_csv_downlaod():
         csv_return += csv
     st.download_button(label="Download Split", data=csv_return, file_name="trolley_items_final.csv", mime="text/csv",key="split")
     
-def push_expense(sObj):
+def push_expense(sObj, description="Sainsburyssplitter"):
     
     Total_due = sum([Decimal(friend["Amount"]) for friend in st.session_state.friend_due])
     for friend in st.session_state.friend_due:
@@ -130,7 +130,7 @@ def push_expense(sObj):
         expense_users.append(expense_user)
     expense = Expense()
     expense.setCost(Total_due)
-    expense.setDescription(f"Sainsburys - {st.session_state.paid_by}")
+    expense.setDescription(description)
     expense.setUsers(expense_users)
     expense.setGroupId(st.session_state["GROUP_ID"])
     nExpense, errors = sObj.createExpense(expense)

@@ -191,7 +191,8 @@ if st.session_state.get("GROUP_ID") is not None and st.session_state.get("new_df
     with st.expander("Push to Splitwise"):
         if st.session_state.get("sObj") is not None:
             sObj = st.session_state["sObj"]
+            description= st.text_input("Enter a description for the expense", value=f"Sainsburys - {st.session_state.paid_by}")
             if st.button("Push to Splitwise"):
-                push_expense(sObj)
+                push_expense(sObj,description)
         else:
             st.error("Please upload the file and add friends to split the bill with")
