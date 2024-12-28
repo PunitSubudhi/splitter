@@ -167,7 +167,6 @@ def push_expense(sObj, description="Sainsburyssplitter") -> None:
     
     if nExpense is not None:
         st.success(f"Expense created successfully with id: {nExpense.getId()}")
-        nExpense.get
     else:
         st.error(f"An error occurred: {errors.getErrors()}")
         
