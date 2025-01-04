@@ -133,7 +133,8 @@ def get_final_csv_downlaod() -> None:
     Download the final CSV file
     """
     csv_return = get_final_csv_string()
-    st.download_button(label="Download Split", data=csv_return, file_name="trolley_items_final.csv", mime="text/csv",key="split")
+    file_name = st.text_input("Enter the file name", value="trolley_items_final") + ".csv"
+    st.download_button(label="Download Split", data=csv_return, file_name=file_name, mime="text/csv",key="split")
     
 def push_expense(sObj, description="Sainsburyssplitter") -> None:
     """ 
