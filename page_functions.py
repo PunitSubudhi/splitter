@@ -5,6 +5,8 @@ from splitwise import Splitwise
 from splitwise.expense import Expense
 from splitwise.user import ExpenseUser
 from decimal import Decimal
+import requests
+import io
 
 def extract_trolley_items(file) -> bool:
     try:
@@ -135,6 +137,54 @@ def get_final_csv_downlaod() -> None:
     csv_return = get_final_csv_string()
     file_name = st.text_input("Enter the file name", value="trolley_items_final") + ".csv"
     st.download_button(label="Download Split", data=csv_return, file_name=file_name, mime="text/csv",key="split")
+
+def upload_csv_to_gofile(csv_string, token):
+    try:
+        # Fetch an available server
+        server_response = requests.get('https://api.gofile.io/servers')
+        if server_response.status_code != 200:
+            raise Exception(f"Failed to query servers: {server_response.status_code}")
+            return csv_string
+        
+        server_data = server_response.json()
+        # 'servers' is a list of available servers with "name" and "zone"
+        if "data" not in server_data or "servers" not in server_data["data"]:
+            raise Exception(f"Unexpected server response format: {server_data}")
+            return csv_string
+        
+        servers_list = server_data["data"]["servers"]
+        if not servers_list:
+            raise Exception(f"No servers returned: {server_data}")
+            return csv_string
+        
+        # Pick the first available server for upload
+        server_name = servers_list[0]["name"]
+
+        # Prepare and send the upload request
+        upload_url = f"https://{server_name}.gofile.io/contents/uploadfile"
+        csv_file = io.StringIO(csv_string)
+        files = {"file": ("upload.csv", csv_file)}
+        upload_response = requests.post(
+            upload_url,
+            files=files,
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        
+        if upload_response.status_code != 200:
+            raise Exception(f"Failed to upload file: {upload_response.status_code}")
+            return csv_string
+        
+        upload_data = upload_response.json()
+        print(f"Upload response: {upload_data}")
+        if "data" not in upload_data or "downloadPage" not in upload_data["data"]:
+            raise Exception(f"Unexpected upload response format: {upload_data}")
+            return csv_string
+        
+        download_url = upload_data["data"]["downloadPage"]
+        return download_url
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
     
 def push_expense(sObj, description="Sainsburyssplitter") -> None:
     """ 
@@ -163,7 +213,7 @@ def push_expense(sObj, description="Sainsburyssplitter") -> None:
     expense.setDescription(description)
     expense.setUsers(expense_users)
     expense.setGroupId(st.session_state["GROUP_ID"])
-    expense.setDetails(get_final_csv_string())
+    expense.setDetails(upload_csv_to_gofile(get_final_csv_string(), st.secrets["gofile_token"]))
     nExpense, errors = sObj.createExpense(expense)
     
     if nExpense is not None:
@@ -191,4 +241,3 @@ def push_expense(sObj, description="Sainsburyssplitter") -> None:
                         st.success("Expense created successfully!")
                     else:
                         st.error(f"An error occurred: {errors.getErrors()}")
-                        
