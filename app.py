@@ -53,7 +53,6 @@ if not st.experimental_user.is_logged_in:
 else:
     with st.sidebar:
         st.write(f"Hello {st.experimental_user.get('given_name')} 👋")
-        st.write(st.experimental_user)
         st.image(st.experimental_user.get("picture"))
         
         if st.button("Logout"):
@@ -61,7 +60,6 @@ else:
             
         if st.secrets.get(st.experimental_user.get("email")):
             if st.secrets[st.experimental_user.get("email")].get("SPLITWISE_API_KEY") is not None:
-                st.write(st.secrets[st.experimental_user.get("email")])
                 params = {
                     "SPLITWISE_API_KEY": st.secrets[st.experimental_user.get("email")].get("SPLITWISE_API_KEY"),
                     "GROUP_ID": st.secrets[st.experimental_user.get("email")].get("SPLITWISE_GID"),
