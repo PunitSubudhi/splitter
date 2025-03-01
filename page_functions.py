@@ -47,6 +47,22 @@ def extract_trolley_items(file) -> bool:
     return True
 
 
+def create_sobj(params):
+    # Store credentials and initialize Splitwise client
+    for key, value in params.items():
+        st.session_state[key] = value
+            
+    # Initialize Splitwise client and store in session state
+    splitwise_client = Splitwise(
+        st.session_state["CONSUMER_KEY"], 
+        st.session_state["CONSUMER_SECRET"], 
+        api_key=st.session_state["SPLITWISE_API_KEY"]
+    )
+    splitwise_client.getCurrentUser()  # Verify credentials work
+    st.session_state["sObj"] = splitwise_client
+    st.toast(f"Connected to Splitwise for {splitwise_client.getCurrentUser().getFirstName()} {splitwise_client.getCurrentUser().getLastName()}")
+    st.toast(f"Ready to Post to Group : {splitwise_client.getGroup(st.session_state['GROUP_ID']).getName()}")
+
 def get_df() -> pd.DataFrame:
     """ 
     Get the DataFrame from the session state

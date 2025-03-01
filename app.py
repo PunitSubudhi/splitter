@@ -41,22 +41,37 @@ required_params = {
     "gid": "GROUP_ID"
 }
 
+
 # Get all params or None if any are missing
 params = {key: st.query_params.get(param) for param, key in required_params.items()}
 if all(params.values()):
-    # Store credentials and initialize Splitwise client
-    for key, value in params.items():
-        st.session_state[key] = value
-            
-    # Initialize Splitwise client and store in session state
-    splitwise_client = Splitwise(
-        st.session_state["CONSUMER_KEY"], 
-        st.session_state["CONSUMER_SECRET"], 
-        api_key=st.session_state["SPLITWISE_API_KEY"]
-    )
-    splitwise_client.getCurrentUser()  # Verify credentials work
-    st.session_state["sObj"] = splitwise_client
+    create_sobj(params)
     
+if not st.experimental_user.is_logged_in:
+    if st.sidebar.button("Login"):
+        st.login()
+else:
+    with st.sidebar:
+        st.write(f"Hello {st.experimental_user.get('given_name')} 👋")
+        st.write(st.experimental_user)
+        st.image(st.experimental_user.get("picture"))
+        
+        if st.button("Logout"):
+            st.logout()
+            
+        if st.secrets.get(st.experimental_user.get("email")):
+            if st.secrets[st.experimental_user.get("email")].get("SPLITWISE_API_KEY") is not None:
+                st.write(st.secrets[st.experimental_user.get("email")])
+                params = {
+                    "SPLITWISE_API_KEY": st.secrets[st.experimental_user.get("email")].get("SPLITWISE_API_KEY"),
+                    "GROUP_ID": st.secrets[st.experimental_user.get("email")].get("SPLITWISE_GID"),
+                    "CONSUMER_KEY": st.secrets[st.experimental_user.get("email")].get("SPLITWISE_CONSUMER_KEY"),
+                    "CONSUMER_SECRET": st.secrets[st.experimental_user.get("email")].get("SPLITWISE_CONSUMER_SECRET")
+                }
+                create_sobj(params)
+        else:
+            st.write("Splitwise API info not found, \n Please contact punitsbudhi@gmail.com")
+        
 if st.session_state.get("file_uploaded") is None:
     st.title("Uplaod Sainsburys Trolley Page or Upload CSV with items to continue")
     with st.form("splitter"):
