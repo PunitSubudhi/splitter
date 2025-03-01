@@ -60,8 +60,8 @@ def create_sobj(params):
     )
     splitwise_client.getCurrentUser()  # Verify credentials work
     st.session_state["sObj"] = splitwise_client
-    st.toast(f"Connected to Splitwise for {splitwise_client.getCurrentUser().getFirstName()} {splitwise_client.getCurrentUser().getLastName()}")
-    st.toast(f"Ready to Post to Group : {splitwise_client.getGroup(st.session_state['GROUP_ID']).getName()}")
+    # st.toast(f"Connected to Splitwise for {splitwise_client.getCurrentUser().getFirstName()} {splitwise_client.getCurrentUser().getLastName()}")
+    # st.toast(f"Ready to Post to Group : {splitwise_client.getGroup(st.session_state['GROUP_ID']).getName()}")
 
 def get_df() -> pd.DataFrame:
     """ 
