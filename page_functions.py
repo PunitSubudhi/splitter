@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 import streamlit as st
 import pandas as pd
@@ -77,6 +78,7 @@ def get_df() -> pd.DataFrame:
     # if price_text and price_currency columns are present, remove them
     if "price_text" in df_to_return.columns and "price_currency" in df_to_return.columns:
         df_to_return.drop(columns=["price_text","price_currency"], inplace=True)
+    df_to_return.index = range(1, len(df_to_return) + 1)
     return df_to_return
 
 def nav_to(url) -> None:

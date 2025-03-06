@@ -30,7 +30,7 @@ import streamlit as st
 import pandas as pd
 from page_functions import *
 
-st.set_page_config(page_title="Split the Bill", page_icon=":money_with_wings:", layout="wide")
+st.set_page_config(page_title="Split the Bill", page_icon=":money_with_wings:", layout="wide",initial_sidebar_state="collapsed")
 
 
 # Check if all required Splitwise parameters are present in query params
