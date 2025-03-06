@@ -1,5 +1,7 @@
+import random
 import re
 from bs4 import BeautifulSoup
+import string
 import streamlit as st
 import pandas as pd
 from splitwise import Splitwise
@@ -8,6 +10,7 @@ from splitwise.user import ExpenseUser
 from decimal import Decimal
 import requests
 import io
+import boto3
 
 def extract_trolley_items(file) -> bool:
     try:
@@ -156,53 +159,32 @@ def get_final_csv_downlaod() -> None:
     file_name = st.text_input("Enter the file name", value="trolley_items_final") + ".csv"
     st.download_button(label="Download Split", data=csv_return, file_name=file_name, mime="text/csv",key="split")
 
-def upload_csv_to_gofile(csv_string, token):
+        
+def upload_csv_to_s3(csv_string, file_name):
     try:
-        # Fetch an available server
-        server_response = requests.get('https://api.gofile.io/servers')
-        if server_response.status_code != 200:
-            raise Exception(f"Failed to query servers: {server_response.status_code}")
-            return csv_string
+        # Convert the CSV string to bytes
+        csv_bytes = io.BytesIO(csv_string.encode('utf-8'))
         
-        server_data = server_response.json()
-        # 'servers' is a list of available servers with "name" and "zone"
-        if "data" not in server_data or "servers" not in server_data["data"]:
-            raise Exception(f"Unexpected server response format: {server_data}")
-            return csv_string
-        
-        servers_list = server_data["data"]["servers"]
-        if not servers_list:
-            raise Exception(f"No servers returned: {server_data}")
-            return csv_string
-        
-        # Pick the first available server for upload
-        server_name = servers_list[0]["name"]
-
-        # Prepare and send the upload request
-        upload_url = f"https://{server_name}.gofile.io/contents/uploadfile"
-        csv_file = io.StringIO(csv_string)
-        files = {"file": ("upload.csv", csv_file)}
-        upload_response = requests.post(
-            upload_url,
-            files=files,
-            headers={"Authorization": f"Bearer {token}"}
+        obj = boto3.client(
+            "s3",
+            aws_access_key_id=st.secrets["aws_access_key_id"],
+            aws_secret_access_key=st.secrets["aws_secret_access_key"]
         )
-        
-        if upload_response.status_code != 200:
-            raise Exception(f"Failed to upload file: {upload_response.status_code}")
-            return csv_string
-        
-        upload_data = upload_response.json()
-        print(f"Upload response: {upload_data}")
-        if "data" not in upload_data or "downloadPage" not in upload_data["data"]:
-            raise Exception(f"Unexpected upload response format: {upload_data}")
-            return csv_string
-        
-        download_url = upload_data["data"]["downloadPage"]
-        return download_url
-
+        Bucket = "sainsburysitems"
+        Key = file_name
+        obj.upload_fileobj(
+            Fileobj=csv_bytes,
+            Bucket=Bucket,
+            Key=Key,
+            ExtraArgs={'ACL': 'public-read'}
+        )
+        # Generate the public URL
+        public_url = f"https://{Bucket}.{st.secrets['aws_url']}/{Key}"
+        return public_url
     except Exception as e:
         print(f"An error occurred: {e}")
+        return csv_string
+    
     
 def push_expense(sObj, description="Sainsburyssplitter") -> None:
     """ 
@@ -231,7 +213,9 @@ def push_expense(sObj, description="Sainsburyssplitter") -> None:
     expense.setDescription(description)
     expense.setUsers(expense_users)
     expense.setGroupId(st.session_state["GROUP_ID"])
-    expense.setDetails(upload_csv_to_gofile(get_final_csv_string(), st.secrets["gofile_token"]))
+    #expense.setDetails(upload_csv_to_gofile(get_final_csv_string(), st.secrets["gofile_token"]))
+    unique_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    expense.setDetails(upload_csv_to_s3(get_final_csv_string(), f"trolley_items_final_{st.session_state.paid_by}_{unique_code}.csv"))
     nExpense, errors = sObj.createExpense(expense)
     
     if nExpense is not None:
