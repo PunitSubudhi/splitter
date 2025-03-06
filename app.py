@@ -71,7 +71,7 @@ else:
             st.write("Splitwise API info not found, \n Please contact punitsbudhi@gmail.com")
         
 if st.session_state.get("file_uploaded") is None:
-    st.title("Uplaod Sainsburys Trolley Page or Upload CSV with items to continue")
+    st.title("Upload Sainsburys Trolley Page or Upload CSV with items to continue")
     with st.form("splitter"):
         file = st.file_uploader("Upload File from Sainsburys Trolley Page", type=["html"])
         submitted = st.form_submit_button("Uplaod and View")
@@ -157,7 +157,7 @@ elif st.session_state.get("file_uploaded") and not st.session_state.get("friends
 elif st.session_state.get("friends_uploaded"):
     df = get_df()
     friends = st.session_state.friends_list
-    st.write(f"Friends to split the bill with: {friends}")
+    st.write(f"Friends to split the bill with: {", ".join(friends)}")
     # Add new columns for each friend to split the bill with
     for friend in friends:
         df[friend] = 0
