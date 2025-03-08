@@ -122,7 +122,7 @@ elif st.session_state.get("file_uploaded") and not st.session_state.get("friends
     with st.expander("View/Download Data"):
         st.dataframe(df)
         Total = df["price"].sum()
-        st.write(f"Total: {Total}")
+        st.write(f"Total: {Total:.2f}")
         st.markdown("### Download Data")
         download_csv()
     # take input of names of friends to be split
