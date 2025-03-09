@@ -180,13 +180,36 @@ def upload_csv_to_s3(csv_string, file_name):
         )
         # Generate the public URL
         public_url = f"https://{Bucket}.{st.secrets['aws_url']}/{Key}"
+        st.session_state["s3_url"] = public_url
         return public_url
     except Exception as e:
         print(f"An error occurred: {e}")
         return csv_string
+
+
+def upload_image_to_s3(image, file_name):
+    try:
+        obj = boto3.client(
+            "s3",
+            aws_access_key_id=st.secrets["aws_access_key_id"],
+            aws_secret_access_key=st.secrets["aws_secret_access_key"]
+        )
+        Bucket = "sainsburysitems"
+        Key = file_name
+        obj.upload_fileobj(
+            Fileobj=image,
+            Bucket=Bucket,
+            Key=Key,
+            ExtraArgs={'ACL': 'public-read'}
+        )
+        # Generate the public URL
+        public_url = f"https://{Bucket}.{st.secrets['aws_url']}/{Key}"
+        return public_url
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
     
-    
-def push_expense(sObj, description="Sainsburyssplitter") -> None:
+def push_expense(sObj, description="Sainsburyssplitter",receipt=None) -> None:
     """ 
     Push the expense to Splitwise
     """
@@ -216,6 +239,19 @@ def push_expense(sObj, description="Sainsburyssplitter") -> None:
     #expense.setDetails(upload_csv_to_gofile(get_final_csv_string(), st.secrets["gofile_token"]))
     unique_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     expense.setDetails(upload_csv_to_s3(get_final_csv_string(), f"trolley_items_final_{st.session_state.paid_by}_{unique_code}.csv"))
+    
+    if receipt is not None:
+        try:
+            st.write(receipt)
+            receipt_content = receipt.read()
+            # Save the receipt photo in as a file and then get the path to that file and then set it as receipt
+            with open(f"temp/receipt_{unique_code}.jpg", "wb") as f:
+                f.write(receipt_content)
+            expense.setReceipt(f"temp/receipt_{unique_code}.jpg")
+            
+        except Exception as e:  
+            st.error(f"An error occurred in setting Receipt: {e}")
+    
     nExpense, errors = sObj.createExpense(expense)
     
     if nExpense is not None:
