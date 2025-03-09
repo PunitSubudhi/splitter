@@ -206,7 +206,8 @@ if st.session_state.get("GROUP_ID") is not None and st.session_state.get("new_df
         if st.session_state.get("sObj") is not None:
             sObj = st.session_state["sObj"]
             description= st.text_input("Enter a description for the expense", value=f"Sainsburys - {st.session_state.paid_by}")
-            receipt = st.file_uploader("Upload a receipt", type=["jpg", "jpeg", "png", "pdf"])
+            # receipt = st.file_uploader("Upload a receipt", type=["jpg", "jpeg", "png", "pdf"])
+            receipt = None
             if st.button("Push to Splitwise"):
                 push_expense(sObj,description,receipt)
         else:
